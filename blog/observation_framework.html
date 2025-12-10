@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>From @StateObject & @ObservedObject to Swift Observation – Islam Swira
+    </title>
+
+    <!-- Base CSS for all portfolio pages -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/observation_framework.css" />
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="../index.html" style="color:inherit;text-decoration:none;">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../projects.html">Projects</a>
+            <a href="../experience.html">Experience</a>
+            <a href="../skills.html">Skills</a>
+            <a href="../contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="blog-article-wrapper">
+        <article class="blog-article">
+
+            <p class="article-meta">
+                SwiftUI Architecture · Nov 26, 2025 · 8 min read
+            </p>
+
+            <h1 class="article-title">
+                From <code>@StateObject</code> &amp; <code>@ObservedObject</code> to Swift Observation
+            </h1>
+
+            <p class="article-intro">
+                SwiftUI's state management story has evolved dramatically: from UIKit view controllers,
+                to <code>ObservableObject</code>, and now to the new <code>@Observable</code> macro and
+                Observation framework. In this article we'll walk through where state used to live,
+                what the older patterns cost us, and how the new Observation system makes things
+                simpler and safer.
+            </p>
+
+            <section class="observation-demo">
+                <h2 class="observation-demo-title">
+                    At a glance: from UIKit controllers to <code>@Observable</code>
+                </h2>
+                <p>
+                    If you step back and look at the last few years of iOS development, state management
+                    has moved through three big phases: imperative UIKit controllers, Combine-based
+                    <code>ObservableObject</code>, and now language-level Observation.
+                </p>
+
+                <div class="observation-demo-layout">
+                    <!-- Phone mockup -->
+                    <div class="observation-phone">
+                        <div class="observation-phone-frame">
+                            <div class="observation-phone-notch"></div>
+
+                            <div class="observation-phone-screen">
+                                <div class="observation-phone-header">
+                                    <span class="observation-chip">State over the years</span>
+                                    <span class="observation-badge">UIKit → SwiftUI → Observation</span>
+                                </div>
+
+                                <div class="observation-stack">
+                                    <div class="observation-row observation-row--uikit">
+                                        <span class="observation-row-label">UIKit controllers</span>
+                                    </div>
+                                    <div class="observation-row observation-row--observable">
+                                        <span class="observation-row-label">
+                                            <code>ObservableObject</code> + <code>@StateObject</code>
+                                        </span>
+                                    </div>
+                                    <div class="observation-row observation-row--observation">
+                                        <span class="observation-row-label">
+                                            <code>@Observable</code> model
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul>
+                            <li><strong>UIKit era:</strong> view controllers owning and mutating all the state.</li>
+                            <li><strong>SwiftUI 1.0:</strong> <code>ObservableObject</code> + <code>@Published</code>
+                                wrapped in <code>@StateObject</code> / <code>@ObservedObject</code>.</li>
+                            <li><strong>Observation:</strong> one <code>@Observable</code> model, with
+                                fine-grained dependency tracking and better performance.
+
+                            </li>
+                        </ul>
+                </div>
+                <p>
+                            The rest of this article drills into each of these phases, but this hero section is
+                            the mental picture you can keep in your head while you read.
+                        </p>
+            </section>
+
+            <section>
+                <h2>Before SwiftUI: Where Did View State Live?</h2>
+                <p>
+                    Long before SwiftUI and <code>@StateObject</code>, most iOS apps were built using UIKit and
+                    the classic MVC pattern. View state and domain state were often mixed together inside
+                    <code>UIViewController</code> subclasses or custom views.
+                </p>
+                <p>
+                    Typical patterns looked like this:
+                </p>
+                <ul>
+                    <li>
+                        <strong>View controllers as "massive" state containers</strong> – properties on
+                        <code>UIViewController</code> for everything: form fields, loading flags, error messages,
+                        and derived values.
+                    </li>
+                    <li>
+                        <strong>Delegates and callbacks</strong> – views communicated upwards using delegate
+                        protocols or closures, and the controller pushed state changes back down.
+                    </li>
+                    <li>
+                        <strong>KVO &amp; notifications</strong> – for cross-screen or cross-layer updates,
+                        teams used KVO or <code>NotificationCenter</code>, which were powerful but fragile and
+                        hard to reason about.
+                    </li>
+                </ul>
+                <p>
+                    This worked, but it had serious drawbacks:
+                </p>
+                <ul>
+                    <li>State was spread across controllers, models, and global singletons.</li>
+                    <li>It was hard to know <em>who</em> owned a piece of state and <em>who</em> could mutate it.</li>
+                    <li>UI updates were usually manual – calling <code>tableView.reloadData()</code>,
+                        <code>setNeedsLayout()</code>, or pushing view controller transitions at the right time.
+                    </li>
+                </ul>
+                <p>
+                    SwiftUI's promise was: describe your UI as a pure function of state, and let the framework
+                    handle updates automatically. But we still needed a way to model that state.
+                </p>
+            </section>
+
+            <section>
+                <h2>The SwiftUI 1.0 Model: <code>ObservableObject</code>, <code>@StateObject</code> &amp;
+                    <code>@ObservedObject</code>
+                </h2>
+                <p>
+                    When SwiftUI first arrived, the main pattern for shared or long-lived state was
+                    <code>ObservableObject</code> plus a couple of property wrappers:
+                </p>
+                <ul>
+                    <li><code>@State</code> – simple local value type state owned by the view.</li>
+                    <li><code>ObservableObject</code> – a reference type that publishes changes via
+                        <code>@Published</code>.
+                    </li>
+                    <li><code>@ObservedObject</code> – a view depends on an <code>ObservableObject</code> it does not
+                        own.</li>
+                    <li><code>@StateObject</code> – a view creates and owns its <code>ObservableObject</code>.</li>
+                    <li><code>@EnvironmentObject</code> – a shared <code>ObservableObject</code> injected via the
+                        environment.</li>
+                </ul>
+                <p>
+                    A typical view model looked like this:
+                </p>
+                <pre><code>final class ProfileViewModel: ObservableObject {
+    @Published var name: String = ""
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
+
+    func load() {
+        isLoading = true
+        // Fetch, then update properties...
+    }
+}</code></pre>
+                <p>
+                    And the SwiftUI view would depend on it using <code>@StateObject</code> or
+                    <code>@ObservedObject</code>:
+                </p>
+                <pre><code>struct ProfileView: View {
+    @StateObject private var viewModel = ProfileViewModel()
+
+    var body: some View {
+        VStack {
+            if viewModel.isLoading {
+                ProgressView()
+            } else {
+                TextField("Name", text: $viewModel.name)
+            }
+        }
+        .task { await viewModel.load() }
+    }
+}</code></pre>
+                <p>
+                    This was already a big step forward compared to UIKit: SwiftUI automatically re-rendered
+                    the view when published properties changed. But the pattern also came with cost.
+                </p>
+            </section>
+
+            <section>
+                <h2>Pain Points With <code>ObservableObject</code>-Based State</h2>
+                <p>
+                    After a few years of building real apps with <code>ObservableObject</code>, some common
+                    issues kept showing up:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Boilerplate and indirection</strong> – you often had a model type
+                        <em>and</em> a view model type, even when their properties were almost identical.
+                    </li>
+                    <li>
+                        <strong>Reference types everywhere</strong> – <code>ObservableObject</code> forces you into
+                        class-based models, even when a simple value type would be enough.
+                    </li>
+                    <li>
+                        <strong>Lifetime rules are easy to get wrong</strong> – choosing between
+                        <code>@StateObject</code>, <code>@ObservedObject</code>, and <code>@EnvironmentObject</code>
+                        confused many teams, especially early in a project.
+                    </li>
+                    <li>
+                        <strong>Testing and previews</strong> – setting up view models and injecting them in the
+                        right way adds extra ceremony for simple UIs.
+                    </li>
+                </ul>
+                <p>
+                    The Swift team's answer in iOS 17 was to take a step back and rethink observation
+                    at the language level, not just as a framework protocol.
+                </p>
+            </section>
+
+            <section>
+                <h2>Enter the Observation Framework and <code>@Observable</code></h2>
+                <p>
+                    The new Observation framework introduces a different mental model:
+                    instead of making your types conform to <code>ObservableObject</code> and annotating each
+                    property with <code>@Published</code>, you annotate the type itself with
+                    <code>@Observable</code>. Swift then automatically tracks which properties are read inside
+                    a view and re-renders that view when those properties change.
+                </p>
+                <pre><code>import Observation
+
+@Observable
+final class ProfileModel {
+    var name: String = ""
+    var isLoading: Bool = false
+    var errorMessage: String?
+}</code></pre>
+                <p>
+                    There is no explicit <code>@Published</code>, and you don't need the
+                    <code>ObservableObject</code> protocol anymore. The type can be a class, a struct,
+                    or even an actor – the macro generates the observation machinery behind the scenes.
+                </p>
+                <p>
+                    In the view, you access it via <code>@State</code>, <code>@Environment</code>, or the new
+                    <code>@Bindable</code> wrapper:
+                </p>
+                <pre><code>struct ProfileView: View {
+    @State private var model = ProfileModel()
+
+    var body: some View {
+        VStack {
+            if model.isLoading {
+                ProgressView()
+            } else {
+                TextField("Name", text: $model.name)
+            }
+        }
+        .task { await load() }
+    }
+
+    func load() async {
+        model.isLoading = true
+        // Fetch data and update model.name / model.errorMessage...
+        model.isLoading = false
+    }
+}</code></pre>
+                <p>
+                    Notice that we're working directly with a single model object. There is no separate
+                    view model that only exists to bridge between state and the UI.
+                </p>
+            </section>
+
+            <section>
+                <h2>Automatic dependency tracking</h2>
+                <p>
+                    One of the biggest differences compared to <code>ObservableObject</code> is how SwiftUI
+                    decides when to re-render a view. With the Observation framework, Swift tracks which
+                    properties are actually read inside a view’s body and only invalidates that view when
+                    those specific properties change.
+                </p>
+                <pre><code>struct GreetingView: View {
+    @State private var model = ProfileModel()
+
+    var body: some View {
+        // Swift tracks a dependency on model.name here
+        Text("Hello, \(model.name)")
+            .font(.headline)
+    }
+}</code></pre>
+                <p>
+                    If some other part of your code changes <code>model.isLoading</code> or
+                    <code>model.errorMessage</code>, <code>GreetingView</code> will not be recomputed,
+                    because it never read those properties. But changing <code>model.name</code> will
+                    invalidate the view. This property-level dependency tracking is a key reason why
+                    Observation can be more efficient and predictable than the old broadcasting model
+                    based on <code>@Published</code>.
+                </p>
+            </section>
+
+            <section>
+                <h2>Value types, classes and even actors</h2>
+                <p>
+                    Another important difference is that <code>@Observable</code> works with more than just
+                    classes. You can annotate a reference type, a value type or even an actor, and the
+                    Observation framework will still track changes correctly.
+                </p>
+                <pre><code>// Observable class
+@Observable
+final class ProfileModel {
+    var name: String = ""
+    var isLoading: Bool = false
+}
+
+// Observable struct
+@Observable
+struct SettingsModel {
+    var isDarkModeEnabled = false
+    var sendNotifications = true
+}
+
+// Observable actor (for concurrency-sensitive state)
+@Observable
+actor UserSession {
+    var token: String?
+    var isAuthenticated: Bool { token != nil }
+
+    func updateToken(_ newToken: String?) {
+        token = newToken
+    }
+}</code></pre>
+                <p>
+                    With <code>ObservableObject</code> you were effectively forced into class-based models.
+                    The Observation framework lets you pick the right tool for each feature while still
+                    getting automatic UI updates when those models change.
+                </p>
+                <p>
+                    Because Observation does property-level tracking instead of broadcasting every change,
+                    it can also be more performant: views only re-render when the data they actually depend
+                    on has changed, which reduces unnecessary work in complex hierarchies.
+                </p>
+            </section>
+            <section>
+                <h2>Using <code>@Bindable</code> for Two-Way Bindings</h2>
+                <p>
+                    When you pass observable models deeper into your view hierarchy, you often want child
+                    views to both read and write to them. Instead of exposing bindings for each property,
+                    you can wrap the entire observable type in <code>@Bindable</code>:
+                </p>
+                <pre><code>struct ProfileForm: View {
+    @Bindable var model: ProfileModel
+
+    var body: some View {
+        Form {
+            TextField("Name", text: $model.name)
+            Toggle("Loading", isOn: $model.isLoading)
+        }
+    }
+}</code></pre>
+                <p>
+                    The <code>@Bindable</code> wrapper exposes bindings for every observable property on
+                    <code>ProfileModel</code>, which keeps the call site clean:
+                </p>
+                <pre><code>struct ProfileView: View {
+    @State private var model = ProfileModel()
+
+    var body: some View {
+        ProfileForm(model: model)
+    }
+}</code></pre>
+                <p>
+                    SwiftUI automatically tracks which properties the child view reads and updates only the
+                    necessary parts of the hierarchy when those properties change.
+                </p>
+            </section>
+
+            <section>
+                <h2>Before vs After: Migrating a Real View Model</h2>
+                <p>
+                    Let's look at a slightly more realistic example and migrate it step by step.
+                </p>
+
+                <p>
+                    <strong>Old: <code>ObservableObject</code>-based view model</strong>
+                </p>
+                <pre><code>final class CounterViewModel: ObservableObject {
+    @Published var count: Int = 0
+    @Published var isBusy: Bool = false
+
+    func increment() {
+        guard !isBusy else { return }
+        isBusy = true
+        count += 1
+        isBusy = false
+    }
+}</code></pre>
+
+                <p>
+                    <strong>New: <code>@Observable</code> model</strong>
+                </p>
+                <pre><code>@Observable
+final class CounterModel {
+    var count: Int = 0
+    var isBusy: Bool = false
+
+    func increment() {
+        guard !isBusy else { return }
+        isBusy = true
+        count += 1
+        isBusy = false
+    }
+}</code></pre>
+
+                <p>
+                    The view becomes simpler as well:
+                </p>
+                <pre><code>struct CounterView: View {
+    @State private var model = CounterModel()
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Count: \(model.count)")
+                .font(.largeTitle)
+
+            Button("Increment") {
+                model.increment()
+            }
+            .disabled(model.isBusy)
+        }
+    }
+}</code></pre>
+                <p>
+                    No <code>@StateObject</code>, no <code>@ObservedObject</code>, and no
+                    <code>@Published</code> boilerplate. You work with plain properties on a single model
+                    and let the Observation framework handle the rest.
+                </p>
+            </section>
+
+            <section>
+                <h2>Do We Still Need <code>@StateObject</code> and <code>@ObservedObject</code>?</h2>
+                <p>
+                    The new Observation APIs don't make the old ones disappear overnight. There are cases
+                    where you may still want <code>ObservableObject</code>:
+                </p>
+                <ul>
+                    <li>You're targeting OS versions earlier than iOS 17 / macOS 14 and can't rely on
+                        the Observation framework everywhere.</li>
+                    <li>You have an existing architecture heavily invested in
+                        <code>ObservableObject</code> and mixing both styles would add confusion.
+                    </li>
+                    <li>You're using third-party libraries that still expose
+                        <code>ObservableObject</code>-based types.
+                    </li>
+                </ul>
+                <p>
+                    That said, for new code bases targeting modern OS versions, starting with
+                    <code>@Observable</code> models and <code>@Bindable</code> views is usually the most
+                    future-proof choice.
+                </p>
+            </section>
+
+            <section>
+                <h2>A Practical Migration Strategy</h2>
+                <p>
+                    You don't need a "big bang" rewrite to adopt the Observation framework. A safe
+                    migration strategy looks like this:
+                </p>
+                <ol>
+                    <li>
+                        <strong>Keep your public API stable</strong> – start by rewriting internal view models
+                        as <code>@Observable</code> types, but keep their public surface the same so views don't
+                        need to change immediately.
+                    </li>
+                    <li>
+                        <strong>Adopt <code>@Observable</code> for new features</strong> – any new screen or module
+                        can start directly with Observation-based models.
+                    </li>
+                    <li>
+                        <strong>Introduce <code>@Bindable</code> in leaf views</strong> – when a view needs to edit
+                        a model, prefer passing the observable type via <code>@Bindable</code> instead of routing
+                        many individual bindings.
+                    </li>
+                    <li>
+                        <strong>Gradually remove legacy glue</strong> – once most of the app uses Observation, you
+                        can start deleting old <code>ObservableObject</code> wrappers and <code>@Published</code>
+                        properties that no longer add value.
+                    </li>
+                </ol>
+                <p>
+                    Over time you end up with a simpler mental model: each feature has a small set of
+                    observable models, views declare which models they depend on, and Swift takes care of
+                    refreshing the right parts of the hierarchy.
+                </p>
+            </section>
+
+            <section>
+                <h2>Wrap Up</h2>
+                <p>
+                    The Observation framework is more than a new property wrapper – it's a new way of
+                    thinking about how SwiftUI tracks changes in your app. Instead of plumbing observable
+                    objects and publishers through your views, you work with plain models annotated with
+                    <code>@Observable</code> and let Swift handle the observation details.
+                </p>
+                <p>
+                    If you're starting a new SwiftUI project on modern OS versions, it's worth designing
+                    your architecture around Observation from day one. And if you're maintaining a large
+                    existing code base, you can still adopt it gradually, one feature at a time.
+                </p>
+            </section>
+
+            <p class="article-back-link">
+                <a href="../index.html">← Back to Home</a>
+            </p>
+
+        </article>
+    </main>
+
+</body>
+
+</html>

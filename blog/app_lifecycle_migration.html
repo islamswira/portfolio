@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>From AppDelegate & SceneDelegate to SwiftUI @main App – Lifecycle Migration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Base portfolio styles -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+
+    <!-- Unified blog article style -->
+    <link rel="stylesheet" href="../css/redacted_modifier.css" />
+
+    <!-- Article-specific animation -->
+    <link rel="stylesheet" href="../css/app_lifecycle_migration.css" />
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="../index.html" style="color:inherit;text-decoration:none;">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../projects.html">Projects</a>
+            <a href="../experience.html">Experience</a>
+            <a href="../skills.html">Skills</a>
+            <a href="../contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="blog-article-wrapper">
+        <article class="blog-article">
+
+            <p class="article-meta">SwiftUI Migration · Nov 2025 · 6 min read</p>
+
+            <h1 class="article-title">
+                From <code>AppDelegate</code> & <code>SceneDelegate</code> to SwiftUI’s <code>@main App</code>
+            </h1>
+
+            <p class="article-intro">
+                UIKit apps start in <code>AppDelegate</code> and <code>SceneDelegate</code>.
+                SwiftUI introduces a new lifecycle with a declarative entry point:
+                the <code>@main App</code> type. In this article we compare the two models and show
+                how to migrate gradually without breaking your existing flow.
+            </p>
+
+            <!-- 🔥 HERO MOCKUP (Animated) -->
+            <section class="lifecycle-hero">
+                <div class="lifecycle-layout">
+
+                    <!-- LEFT TEXT -->
+                    <div class="lifecycle-text">
+                        <p class="lifecycle-kicker">Lifecycle Evolution</p>
+
+                        <h2 class="lifecycle-heading">
+                            The shift from imperative delegates to a declarative app structure
+                        </h2>
+
+                        <p class="lifecycle-body">
+                            UIKit splits responsibilities between <code>AppDelegate</code> and
+                            <code>SceneDelegate</code>. SwiftUI unifies everything under a single
+                            <code>@main App</code> entry point with cleaner lifecycle handling,
+                            multi-window support, and scene-based state management.
+                        </p>
+
+                        <ul class="lifecycle-points">
+                            <li><strong>UIKit:</strong> scattered callbacks.</li>
+                            <li><strong>SwiftUI:</strong> one clean entry point.</li>
+                            <li><strong>Migration:</strong> painless using <code>@UIApplicationDelegateAdaptor</code>.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- RIGHT MOCKUP (Animated) -->
+                    <div class="lifecycle-visual">
+                        <div class="lifecycle-phone">
+
+                            <!-- Status bar -->
+                            <div class="lifecycle-statusbar"></div>
+
+                            <!-- AppDelegate screen -->
+                            <div class="lifecycle-screen lifecycle-screen--appdelegate">
+                                <div class="lifecycle-pill lifecycle-pill--blue">AppDelegate</div>
+                                <div class="lifecycle-line"></div>
+                                <div class="lifecycle-line lifecycle-line--short"></div>
+                            </div>
+
+                            <!-- SceneDelegate screen -->
+                            <div class="lifecycle-screen lifecycle-screen--scenedelegate">
+                                <div class="lifecycle-pill lifecycle-pill--blue">SceneDelegate</div>
+                                <div class="lifecycle-line"></div>
+                                <div class="lifecycle-line lifecycle-line--short"></div>
+                            </div>
+
+                            <!-- SwiftUI @main App screen -->
+                            <div class="lifecycle-screen lifecycle-screen--swiftui">
+                                <div class="lifecycle-pill lifecycle-pill--orange">@main App</div>
+                                <div class="lifecycle-line"></div>
+                                <div class="lifecycle-line lifecycle-line--short"></div>
+                                <div class="lifecycle-button">WindowGroup { RootView() }</div>
+                            </div>
+                        </div>
+
+                        <p class="lifecycle-caption">
+                            UIKit entry points fade out → SwiftUI’s unified <code>@main App</code> fades in.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ---------- CONTENT SECTIONS ---------- -->
+
+            <section>
+                <h2>How the lifecycle worked in UIKit</h2>
+                <p>
+                    UIKit apps historically started with <code>AppDelegate</code> handling global
+                    events like launching, notifications and background transitions. From iOS 13,
+                    <code>SceneDelegate</code> was introduced to manage windows and scenes.
+                </p>
+
+                <pre><code class="language-swift">
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions options: ...
+    ) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
+</code></pre>
+
+                <pre><code class="language-swift">
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, ...) {
+        window = UIWindow(windowScene: scene as! UIWindowScene)
+        window?.rootViewController = UIHostingController(rootView: RootView())
+        window?.makeKeyAndVisible()
+    }
+}
+</code></pre>
+
+            </section>
+
+            <section>
+                <h2>Enter SwiftUI’s <code>@main App</code></h2>
+                <pre><code class="language-swift">
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup {
+            RootView()
+        }
+    }
+}
+</code></pre>
+
+                <p>
+                    This replaces both AppDelegate and SceneDelegate. Your app’s window, main view,
+                    and scene structure are now declared inside a single SwiftUI type.
+                </p>
+            </section>
+
+            <section>
+                <h2>Lifecycle handling with <code>scenePhase</code></h2>
+
+                <pre><code class="language-swift">
+@Environment(\.scenePhase) private var scenePhase
+
+var body: some Scene {
+    WindowGroup {
+        RootView()
+            .onChange(of: scenePhase) { phase in
+                switch phase {
+                case .active: startSession()
+                case .background: saveState()
+                default: break
+                }
+            }
+    }
+}
+</code></pre>
+
+            </section>
+
+            <section>
+                <h2>Keeping AppDelegate during migration</h2>
+                <p>
+                    Many real-world apps still require AppDelegate logic (Firebase, push notifications,
+                    background tasks). SwiftUI supports this natively using:
+                </p>
+
+                <pre><code class="language-swift">
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken token: Data) {
+        PushManager.shared.updateToken(token)
+    }
+}
+
+@main
+struct MyApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    var body: some Scene {
+        WindowGroup { RootView() }
+    }
+}
+</code></pre>
+                <section>
+                    <h2>Advanced migration notes for production apps</h2>
+                    <p>
+                        Migrating to SwiftUI’s <code>@main App</code> lifecycle is more than replacing two files.
+                        Real-world apps rely on deep linking, background tasks, multi-window behavior and
+                        platform-specific events.
+                        The SwiftUI lifecycle can handle all of these—but you need to understand how the new system maps
+                        to UIKit's behavior.
+                    </p>
+
+                    <!-- 1. SwiftUI multi-scene system -->
+                    <h3>1. SwiftUI’s multi-scene system replaces SceneDelegate entirely</h3>
+                    <p>
+                        Unlike UIKit’s <code>SceneDelegate</code>, SwiftUI’s scene system is declarative.
+                        Each scene is defined as a value in your <code>App</code> body.
+                        You can add multiple windows, customize activation, and route external events to specific
+                        scenes.
+                    </p>
+                    <pre><code class="language-swift">
+var body: some Scene {
+    WindowGroup("Dashboard") { DashboardView() }
+        .handlesExternalEvents(matching: ["dashboard"])
+
+    WindowGroup("Inspector") { InspectorView() }
+        .handlesExternalEvents(matching: ["inspector"])
+}
+</code></pre>
+
+                    <!-- 2. State restoration -->
+                    <h3>2. State restoration using @SceneStorage, @AppStorage and NavigationPath</h3>
+                    <p>
+                        UIKit relied on <code>encodeRestorableState</code> and
+                        <code>application(_:shouldRestoreState)</code>.
+                        SwiftUI performs automatic state restoration using <code>@SceneStorage</code> and
+                        <code>@AppStorage</code>,
+                        and can restore navigation stacks using a Codable <code>NavigationPath</code>.
+                    </p>
+                    <pre><code class="language-swift">
+@SceneStorage("selectedTab") private var selectedTab = 0
+</code></pre>
+
+                    <!-- 3. App lifetime -->
+                    <h3>3. The SwiftUI <code>App</code> struct lives for the entire lifetime of the process</h3>
+                    <p>
+                        A common misconception is that SwiftUI recreates the App struct the way it recreates Views.
+                        It does not. The App struct is initialized once at launch and persists until termination,
+                        even though its body is recomputed.
+                        Initialization logic inside <code>init()</code> is guaranteed to run exactly once.
+                    </p>
+
+                    <!-- 4. Environment replaces UIApplication globals -->
+                    <h3>4. The environment replaces major UIApplication callbacks</h3>
+                    <p>
+                        Many responsibilities of <code>UIApplicationDelegate</code> move to SwiftUI environment values:
+                    </p>
+                    <pre><code class="language-swift">
+@Environment(\.openURL) private var openURL
+@Environment(\.scenePhase) private var scenePhase
+@Environment(\.dismiss) private var dismiss
+</code></pre>
+                    <p>
+                        These remove the need for several AppDelegate callbacks, routing them declaratively instead.
+                    </p>
+
+                    <!-- 5. macOS / multi-platform behavior -->
+                    <h3>5. SwiftUI lifecycle unifies iOS, macOS and iPadOS behavior</h3>
+                    <p>
+                        SwiftUI’s lifecycle is cross-platform. This enables features like:
+                    </p>
+                    <ul>
+                        <li>customizing macOS menu commands</li>
+                        <li>supporting multiple windows on iPad/mac</li>
+                        <li>adding custom keyboard shortcuts</li>
+                    </ul>
+                    <pre><code class="language-swift">
+var body: some Scene {
+    WindowGroup { RootView() }
+        .commands {
+            SidebarCommands()
+            CommandMenu("Developer") {
+                Button("Reload Data") { reload() }
+            }
+        }
+}
+</code></pre>
+
+                    <!-- 6. Background tasks -->
+                    <h3>6. Handling background tasks in the SwiftUI App lifecycle</h3>
+                    <p>
+                        UIKit apps typically register background tasks inside AppDelegate.
+                        In SwiftUI, perform this in <code>init()</code> of your App struct:
+                    </p>
+                    <pre><code class="language-swift">
+@main
+struct MyApp: App {
+    init() {
+        BGTaskScheduler.shared.register(
+            forTaskWithIdentifier: "sync",
+            using: nil
+        ) { task in
+            handleBackgroundSync(task: task as! BGProcessingTask)
+        }
+    }
+}
+</code></pre>
+
+                    <!-- 7. NotificationCenter bridge -->
+                    <h3>7. Handling notifications inside SwiftUI views</h3>
+                    <p>
+                        Instead of relying on delegate callbacks, you can respond to
+                        notifications directly from your SwiftUI Views:
+                    </p>
+                    <pre><code class="language-swift">
+.onReceive(NotificationCenter.default.publisher(for: .userLoggedOut)) { _ in
+    navigationPath = []
+}
+</code></pre>
+
+                    <!-- 8. SceneDelegateAdaptor -->
+                    <h3>8. You can still use a custom SceneDelegate if needed</h3>
+                    <p>
+                        Rare but useful for large UIKit projects during migration:
+                    </p>
+                    <pre><code class="language-swift">
+@SceneDelegateAdaptor(CustomSceneDelegate.self) var sceneDelegate
+</code></pre>
+
+                    <!-- 9. SwiftData integration -->
+                    <h3>9. SwiftData integrates directly at the lifecycle level</h3>
+                    <pre><code class="language-swift">
+WindowGroup {
+    RootView()
+        .modelContainer(for: [UserModel.self])
+}
+</code></pre>
+                    <p>
+                        This is now the preferred persistence model for SwiftUI apps.
+                    </p>
+
+                    <!-- 10. init() in @main App -->
+                    <h3>10. Use <code>init()</code> in your App type for global setup</h3>
+                    <p>
+                        This replaces most of the logic that previously lived in AppDelegate:
+                    </p>
+                    <pre><code class="language-swift">
+@main
+struct MyApp: App {
+    init() {
+        FirebaseApp.configure()
+        Analytics.shared.start()
+        DependencyContainer.shared.bootstrap()
+    }
+}
+</code></pre>
+
+                </section>
+
+            </section>
+
+            <section class="article-section--summary">
+                <h2>Summary</h2>
+                <ul class="article-takeaways">
+                    <li><strong>UIKit:</strong> lifecycle split across AppDelegate + SceneDelegate.</li>
+                    <li><strong>SwiftUI:</strong> unified <code>@main App</code> entry point.</li>
+                    <li><strong>scenePhase:</strong> replaces major lifecycle callbacks.</li>
+                    <li><strong>AppDelegateAdaptor:</strong> keeps legacy logic during migration.</li>
+                </ul>
+            </section>
+
+            <p class="article-back-link">
+                <a href="../index.html">← Back to Home</a>
+            </p>
+
+        </article>
+    </main>
+</body>
+
+</html>

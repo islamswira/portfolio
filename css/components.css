@@ -1,0 +1,115 @@
+/* ============================
+         COMPONENTS
+============================ */
+
+/* BUTTONS */
+.btn {
+    padding: 14px 26px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: 0.35s;
+    font-size: 17px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.primary {
+    background: linear-gradient(135deg, var(--orange), var(--orange-soft));
+    box-shadow: var(--shadow-orange);
+    color: white;
+}
+
+.primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 25px rgba(255,106,0,0.6);
+}
+
+.secondary {
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+}
+
+.secondary:hover {
+    background: var(--cyan);
+    color: black;
+    box-shadow: var(--shadow-cyan);
+}
+
+/* SKILL PILLS */
+.skill-pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    border: 1px solid rgba(14,165,233,0.40);
+    color: var(--cyan-soft);
+    background: rgba(14,165,233,0.12);
+    display: inline-flex;
+    width: auto;
+    cursor: default;
+    transition: 0.3s;
+}
+
+.skill-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-cyan);
+}
+
+/* EXP TAGS */
+.exp-tag {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(14,165,233,0.35);
+    color: var(--cyan-soft);
+    background: rgba(14,165,233,0.12);
+}
+
+/* CARDS GENERAL */
+.project-card,
+.blog-card,
+.exp-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    transition: 0.35s ease;
+}
+
+/* Scroll indicator (fixed bottom) */
+.scroll-indicator {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.scroll-indicator.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
+}
+
+.scroll-glow {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(255,150,40,0.45), rgba(255,120,20,0));
+    filter: blur(55px);
+    z-index: -1;
+}
+
+/* REVEAL */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: 0.8s ease-out;
+}
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}

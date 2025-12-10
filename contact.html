@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact – Islam Swira</title>
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+
+    <!-- Page specific -->
+    <link rel="stylesheet" href="css/contact.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+</head>
+<script src="script.js"></script>
+<body>
+
+    <!-- NAVBAR (same as all pages) -->
+    <header class="navbar">
+        <div class="logo">
+            <a href="index.html">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="projects.html">Projects</a>
+            <a href="experience.html">Experience</a>
+            <a href="contact.html" class="active-link-contact">Contact Me</a>
+        </nav>
+    </header>
+
+    <main class="contact-page">
+
+        <!-- SECTION 1 — You can find me -->
+        <section class="find-me container">
+            <h1 class="find-title">You can find me</h1>
+
+            <p class="find-subtitle">
+                I'm always open to new opportunities, collaborations, and technical discussions.
+                You can reach me directly through any of these platforms.
+            </p>
+
+            <div class="contact-icons">
+                <a class="contact-icon" href="https://github.com/islamswira">
+                    <img src="assets/images/github_icon.png" />
+                </a>
+                <a class="contact-icon" href="https://www.linkedin.com/in/islam-swira/">
+                    <img src="assets/images/linkedIn_icon.png" />
+                </a>
+                <a class="contact-icon" href="mailto:islam.swira@gmail.com">
+                    <img src="assets/images/gmail_icon.png" />
+                </a>
+            </div>
+
+        </section>
+
+        <!-- Divider -->
+        <div class="divider">OR</div>
+
+        <!-- SECTION 2 — Contact Form -->
+        <section class="contact-form-section container">
+            <h2 class="form-title">You can get in touch</h2>
+
+            <p class="find-subtitle">
+                Prefer to send a direct message? Drop your details below and I’ll get back to you as soon as I can.
+            </p>
+
+            <form id="contactForm" class="contact-form" action="https://formspree.io/f/mzznjzow" method="POST">
+
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" id="name" required placeholder="Your name">
+                    <small class="error-message"></small>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" id="email" required placeholder="Your email">
+                    <small class="error-message"></small>
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea name="message" id="message" required placeholder="Write your message here..."></textarea>
+                    <small class="error-message"></small>
+                </div>
+
+                <button type="submit" class="send-btn">Send Message</button>
+            </form>
+
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

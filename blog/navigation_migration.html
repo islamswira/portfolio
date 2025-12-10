@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>From UINavigationController to NavigationStack – SwiftUI Navigation Migration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- نفس ملفات البورتفوليو الأساسية -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+
+    <!-- نفس ستايل المقالات (علشان الألوان والـ typography تبقى موحدة) -->
+    <link rel="stylesheet" href="../css/redacted_modifier.css" />
+
+    <!-- CSS الصغير بتاع المقال ده بس (الهيرو والموكاب) -->
+    <link rel="stylesheet" href="../css/navigation_migration.css" />
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="../index.html" style="color:inherit;text-decoration:none;">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../projects.html">Projects</a>
+            <a href="../experience.html">Experience</a>
+            <a href="../skills.html">Skills</a>
+            <a href="../contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="blog-article-wrapper">
+        <article class="blog-article">
+
+            <p class="article-meta">
+                SwiftUI Migration · Nov 2025 · 8 min read
+            </p>
+
+            <h1 class="article-title">
+                From <code>UINavigationController</code> to <code>NavigationStack</code>:
+                Modern Navigation in SwiftUI
+            </h1>
+
+            <p class="article-intro">
+                For years, <code>UINavigationController</code> was the default way to handle
+                navigation in iOS apps. With SwiftUI, <code>NavigationStack</code> and
+                <code>NavigationPath</code> give us a data-driven alternative. In this article,
+                we’ll walk through the mental shift from “push/pop view controllers” to
+                describing navigation as state.
+            </p>
+
+            <!-- 🔥 HERO MOCKUP مخصوص المقال ده -->
+            <section class="nav-migration-demo">
+                <div class="nav-migration-layout">
+                    <div class="nav-migration-text">
+                        <p class="nav-migration-kicker">UIKit → SwiftUI</p>
+                        <h2 class="nav-migration-heading">
+                            From imperative stacks to data-driven navigation
+                        </h2>
+                        <p class="nav-migration-body">
+                            In UIKit you call <code>pushViewController</code> and
+                            <code>popViewController</code> directly on a shared
+                            <code>UINavigationController</code>. In SwiftUI, your navigation
+                            stack is just data – an array or a <code>NavigationPath</code> –
+                            and the framework keeps the UI in sync with that state.
+                        </p>
+                        <ul class="nav-migration-points">
+                            <li><strong>UIKit:</strong> “Go to this screen now.”</li>
+                            <li><strong>SwiftUI:</strong> “Here is the path I want.”</li>
+                            <li><strong>Result:</strong> easier deep links, testing, and state restoration.</li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-migration-visual">
+                        <div class="nav-mockup-phone">
+                            <div class="nav-mockup-statusbar"></div>
+
+                            <!-- UIKit state -->
+                            <div class="nav-mockup-screen nav-mockup-screen--uikit">
+                                <div class="nav-mockup-pill nav-mockup-pill--uikit">UIKit stack</div>
+                                <div class="nav-mockup-line"></div>
+                                <div class="nav-mockup-line nav-mockup-line--short"></div>
+                                <div class="nav-mockup-button nav-mockup-button--push">
+                                    pushViewController(_:animated:)
+                                </div>
+                            </div>
+
+                            <!-- SwiftUI state -->
+                            <div class="nav-mockup-screen nav-mockup-screen--swiftui">
+                                <div class="nav-mockup-pill nav-mockup-pill--swiftui">NavigationStack</div>
+                                <div class="nav-mockup-line"></div>
+                                <div class="nav-mockup-line nav-mockup-line--short"></div>
+                                <div class="nav-mockup-button nav-mockup-button--link">
+                                    NavigationLink(value:)
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="nav-mockup-caption">
+                            Same flow, different mindset: from pushing controllers to evolving a
+                            <code>path</code> that describes where you are.
+                        </p>
+                    </div>
+                </div>
+            </section>
+            <!-- 🔚 END HERO -->
+
+            <section>
+                <h2>Why migrate your navigation?</h2>
+                <p>
+                    For a long time, navigation in UIKit worked well enough. But as apps grew,
+                    logic around <code>UINavigationController</code> often became a tangle of
+                    <code>push</code> / <code>pop</code> calls, conditional transitions and
+                    cross-feature deep links.
+                </p>
+                <p>
+                    SwiftUI’s <code>NavigationStack</code> gives you a chance to simplify.
+                    Instead of sprinkling navigation calls across view controllers, you treat
+                    the navigation state as data that lives next to the rest of your app state.
+                </p>
+            </section>
+
+            <section>
+                <h2>How navigation worked in UIKit</h2>
+                <p>
+                    In UIKit, you typically store a reference to the navigation controller and
+                    call methods on it:
+                </p>
+
+                <pre><code class="language-swift">
+// UIKit style navigation
+
+class ArticlesViewController: UIViewController {
+
+    func didSelectArticle(_ article: Article) {
+        let detailVC = ArticleDetailViewController(article: article)
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+
+    func didFinish() {
+        navigationController?.popViewController(animated: true)
+    }
+}
+</code></pre>
+
+                <p>
+                    This works, but navigation logic tends to be spread out:
+                </p>
+                <ul>
+                    <li>Each view controller can decide where to navigate next.</li>
+                    <li>Deep links require custom coordinators or router objects.</li>
+                    <li>Restoring the stack after relaunch is non-trivial.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Enter <code>NavigationStack</code></h2>
+                <p>
+                    In SwiftUI, the primary navigation container is <code>NavigationStack</code>.
+                    It owns a <code>path</code> – usually an array or <code>NavigationPath</code> –
+                    which represents the current stack of destinations.
+                </p>
+
+                <pre><code class="language-swift">
+struct ArticlesView: View {
+    @State private var path: [Article] = []
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            List(articles) { article in
+                NavigationLink(value: article) {
+                    ArticleRow(article: article)
+                }
+            }
+            .navigationDestination(for: Article.self) { article in
+                ArticleDetailView(article: article)
+            }
+            .navigationTitle("Articles")
+        }
+    }
+}
+</code></pre>
+
+                <p>
+                    The visible stack is now just an array of <code>Article</code>. To open a
+                    detail screen, you append an article to the path. To go back, you remove
+                    the last element.
+                </p>
+            </section>
+
+            <section>
+                <h2>Mapping UIKit APIs to SwiftUI patterns</h2>
+
+                <div class="comparison-grid">
+                    <div>
+                        <h3>1. Pushing a detail screen</h3>
+                        <pre><code class="language-swift">
+// UIKit
+navigationController?.pushViewController(detailVC, animated: true)
+</code></pre>
+
+                        <pre><code class="language-swift">
+// SwiftUI
+NavigationLink(value: article) {
+    ArticleRow(article: article)
+}
+</code></pre>
+                        <p>
+                            In SwiftUI you don’t push imperatively. You describe a link that,
+                            when activated, appends to the navigation path.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3>2. Programmatic navigation</h3>
+                        <pre><code class="language-swift">
+// UIKit
+func openArticle(_ article: Article) {
+    let detailVC = ArticleDetailViewController(article: article)
+    navigationController?.pushViewController(detailVC, animated: true)
+}
+</code></pre>
+
+                        <pre><code class="language-swift">
+// SwiftUI
+func openArticle(_ article: Article) {
+    path.append(article)
+}
+</code></pre>
+                        <p>
+                            Programmatic navigation becomes a simple state mutation on
+                            <code>path</code>.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3>3. Going back</h3>
+                        <pre><code class="language-swift">
+// UIKit
+navigationController?.popViewController(animated: true)
+</code></pre>
+
+                        <pre><code class="language-swift">
+// SwiftUI
+path.removeLast()
+// or reset:
+path = []
+</code></pre>
+                        <p>
+                            Back navigation is no longer a method call on a controller.
+                            It is a change in your navigation state.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Deep linking with <code>NavigationPath</code></h2>
+                <p>
+                    One of the biggest differences from UIKit is how deep links are handled.
+                    Because the stack is just data, you can construct it directly from a URL
+                    or routing configuration.
+                </p>
+
+                <pre><code class="language-swift">
+enum Route: Hashable {
+    case list
+    case article(id: UUID)
+}
+
+struct RootView: View {
+    @State private var path = NavigationPath()
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            ArticlesView()
+                .navigationDestination(for: Route.self) { route in
+                    switch route {
+                    case .list:
+                        ArticlesView()
+                    case .article(let id):
+                        ArticleDetailView(id: id)
+                    }
+                }
+        }
+        .onOpenURL { url in
+            if let route = route(from: url) {
+                path.append(route)
+            }
+        }
+    }
+}
+</code></pre>
+
+                <p>
+                    In UIKit this usually requires a custom coordinator that parses the URL
+                    and manually pushes the right view controllers. With <code>NavigationPath</code>
+                    you can rebuild the stack from pure data.
+                </p>
+            </section>
+
+            <section>
+                <h2>Coexisting with UIKit during migration</h2>
+                <p>
+                    Real projects rarely switch from UIKit to SwiftUI in one step. You can
+                    embed SwiftUI screens inside a UIKit navigation controller or present
+                    UIKit flows from SwiftUI using representable wrappers.
+                </p>
+
+                <pre><code class="language-swift">
+// Embedding SwiftUI inside UIKit
+let rootView = ArticlesView()
+let hosting = UIHostingController(rootView: rootView)
+let navigationController = UINavigationController(rootViewController: hosting)
+window.rootViewController = navigationController
+</code></pre>
+
+                <pre><code class="language-swift">
+// Embedding UIKit inside SwiftUI
+struct LegacyProfileView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        LegacyProfileViewController()
+    }
+
+    func updateUIViewController(_ vc: UIViewController, context: Context) {}
+}
+</code></pre>
+
+                <p>
+                    This hybrid approach lets you migrate feature by feature while keeping
+                    the app stable.
+                </p>
+            </section>
+
+            <section class="article-section--summary">
+                <h2>Summary</h2>
+                <p>
+                    Moving from <code>UINavigationController</code> to
+                    <code>NavigationStack</code> is more than a syntax change. It’s a shift
+                    from imperative navigation calls to describing your navigation state
+                    as data.
+                </p>
+                <ul class="article-takeaways">
+                    <li><strong>UIKit:</strong> navigation lives in view controllers.</li>
+                    <li><strong>SwiftUI:</strong> navigation lives in values and paths.</li>
+                    <li>
+                        <strong>Deep links:</strong> easier to support by constructing
+                        the path directly.
+                    </li>
+                    <li>
+                        <strong>Migration:</strong> wrap SwiftUI in UIKit and UIKit in
+                        SwiftUI to move flow by flow.
+                    </li>
+                </ul>
+            </section>
+
+            <p class="article-back-link">
+                <a href="../index.html">← Back to Home</a>
+            </p>
+
+        </article>
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,167 @@
+/* PAGE LAYOUT */
+.contact-page {
+    padding-top: 80px;
+    color: #fff;
+}
+
+/* Center container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* ------------------------------
+   SECTION 1 — FIND ME
+------------------------------ */
+
+.find-title {
+    text-align: center;
+    font-size: clamp(40px, 4vw, 56px);
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.find-subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 700px;
+    margin: 0 auto 50px;
+    font-size: 1.1rem;
+}
+
+/* ICON ROW */
+.contact-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px; /* المسافة بين الأيقونات */
+    margin-top: 40px;
+}
+
+/* ICON STYLE */
+.contact-icon img {
+    width: 80px;         /* الحجم الأنسب */
+    height: 80px;
+    object-fit: contain;
+    cursor: pointer;
+
+    /* NEW glowing effect */
+    filter: drop-shadow(0 0 12px rgba(255, 126, 20, 0.45));
+    transition: 0.25s ease-in-out;
+}
+
+.contact-icon img:hover {
+    transform: translateY(-6px) scale(1.10);
+    filter: drop-shadow(0 0 18px rgba(255, 126, 20, 0.8));
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    letter-spacing: 4px;
+    margin: 70px auto 40px;
+    width: 80%;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 126, 20, 0.5),
+            transparent);
+}
+
+/* ------------------------------
+   SECTION 2 — FORM
+------------------------------ */
+
+.form-title {
+    text-align: center;
+    font-size: clamp(32px, 3vw, 42px);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 auto 40px;
+    max-width: 600px;
+}
+
+.contact-form-section {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.contact-form {
+    background: linear-gradient(180deg, #0c0e17 0%, #0b0d13 100%);
+    padding: 32px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 35px rgba(255, 126, 20, 0.18);
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 22px;
+    background: #0d0f15;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.contact-form textarea {
+    height: 150px;
+    resize: none;
+}
+
+.send-btn {
+    width: 100%;
+    padding: 16px;
+    background: #ff7a1a;
+    border-radius: 14px;
+    border: none;
+    color: #000;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.send-btn:hover {
+    background: #ff8f3a;
+}
+.error-message {
+    color: #ff4444;
+    font-size: 13px;
+    margin-top: 4px;
+    min-height: 18px;
+    display: block;
+}
+
+input.error,
+textarea.error {
+    border: 1px solid #ff4444 !important;
+}
+

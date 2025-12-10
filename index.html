@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Islam Swira – Senior Mobile Development Engineer (iOS)</title>
+
+    <!-- CSS modules -->
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/home.css" />
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Lottie Web Component (lottie-player) -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo">
+        <a href="index.html" style="color: inherit; text-decoration: none;">Islam Swira</a>
+    </div>
+    <nav>
+        <a href="index.html" class="active-link">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="experience.html">Experience</a>
+        <a href="contact.html" class="hire">Contact Me</a>
+    </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+
+    <!-- LEFT SIDE -->
+    <div class="hero-left">
+
+        <div class="hero-badge">
+            <span>🚀 Senior Mobile Development Engineer (iOS)</span>
+        </div>
+
+        <p class="hi-text">HI! I'M</p>
+
+        <h1 class="hero-name">
+            Islam <span class="gradient-name">Swira</span>
+        </h1>
+
+        <p class="hero-bio">
+            Senior Mobile Development Engineer (iOS) with 6+ years of experience building
+            high-impact financial, social, and payment applications — specializing in SwiftUI,
+            modern architecture, SDK development, video platforms, and
+            performance-driven solutions that scale.
+        </p>
+
+        <!-- SKILLS TAGS -->
+        <div class="hero-skills">
+            <div class="skill-pill">SwiftUI</div>
+            <div class="skill-pill">Clean Architecture</div>
+            <div class="skill-pill">SDK Development</div>
+            <div class="skill-pill">Fintech Apps</div>
+            <div class="skill-pill">Performance Optimization</div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="btn-group">
+            <a href="contact.html" class="btn primary">Hire Me</a>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE – LOTTIE SHOWCASE -->
+    <div class="hero-right">
+        <lottie-player
+            src="assets/animations/mobile-showcase.json"
+            background="transparent"
+            speed="1"
+            loop
+            autoplay>
+        </lottie-player>
+    </div>
+
+</section>
+
+<!-- BLOG SECTION -->
+<section class="blog reveal">
+
+    <div class="blog-header">
+        <h2 class="section-title">Blog</h2>
+    </div>
+
+    <!-- SECTION 1 – SwiftUI Tips -->
+    <div class="blog-section">
+        <h3 class="blog-section-title">#SwiftUI Tips & Patterns</h3>
+
+        <div class="blog-grid">
+            <article class="blog-card" onclick="location.href='blog/redacted_modifier.html'">
+                <h4>Using .redacted() Modifier in SwiftUI</h4>
+                <p>How the .redacted() modifier evolved, why Apple introduced it, and when to apply it for cleaner loading states.</p>
+            </article>
+        </div>
+     <!-- SECTION 2 – Migarion from UIKit -> SwiftUI -->
+        <h3 class="blog-section-title">#Migarion from UIKit -> SwiftUI</h3>
+        <div class="blog-grid">
+            <article class="blog-card" onclick="location.href='blog/observation_framework.html'">
+                <h4>From UIKit to @StateObject to Swift Observation Framework</h4>
+                <p>Understanding SwiftUI's state management evolution: why @Observable changes everything for modern iOS architecture.</p>
+            </article>
+            <article class="blog-card" onclick="location.href='blog/navigation_migration.html'">
+                <h4>From UINavigationController to NavigationStack</h4>
+                <p>Transforming imperative push/pop code into a clean, declarative SwiftUI flow.</p>
+            </article>
+            <article class="blog-card" onclick="location.href='blog/app_lifecycle_migration.html'">
+                <h4>From AppDelegate / SceneDelegate → @main App</h4>
+                <p>A deep dive into @main App, scene management, and bridging legacy AppDelegate code.</p>
+            </article>
+        </div>
+    </div>
+
+    <!--TODO: - add new Sections (Architecture / Performance / SDKs...) -->
+
+</section>
+
+<!-- SCROLL INDICATOR  -->
+<div class="scroll-indicator">
+    <div class="scroll-glow"></div>
+
+    <lottie-player
+        src="assets/animations/scroll_arrow_animation.json"
+        background="transparent"
+        speed="1"
+        style="width: 80px; height: 80px;"
+        loop
+        autoplay>
+    </lottie-player>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

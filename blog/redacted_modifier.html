@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SwiftUI Tip — .redacted(reason: .placeholder) – Islam Swira
+    </title>
+
+    <!-- Base CSS for all portfolio pages -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/redacted_modifier.css" />
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="../index.html" style="color:inherit;text-decoration:none;">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../projects.html">Projects</a>
+            <a href="../experience.html">Experience</a>
+            <a href="../skills.html">Skills</a>
+            <a href="../contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="blog-article-wrapper">
+        <article class="blog-article">
+
+            <p class="article-meta">
+                SwiftUI Tips · Nov 25, 2025 · 6 min read
+            </p>
+
+            <h1 class="article-title">
+                Using <code>.redacted(reason: .placeholder)</code> for SwiftUI Skeleton States
+            </h1>
+
+            <p class="article-intro">
+                Loading states are one of those small details that make an app feel
+                “product ready” instead of just “it works”. In this article I’ll walk
+                through how <code>.redacted(reason: .placeholder)</code> solves the
+                classic skeleton view problem in SwiftUI, what we used to do before it
+                existed, and a clean pattern you can plug into real projects.
+            </p>
+
+            <!-- Hero demo: iPhone only -->
+            <section class="redacted-demo">
+                <h2 class="redacted-demo-title">
+                    Before &amp; After <code>.redacted(.placeholder)</code>
+                </h2>
+
+                <div class="redacted-demo-layout">
+                    <!-- iPhone mockup with animated skeleton -> real UI -->
+                    <div class="redacted-phone">
+                        <div class="redacted-phone-frame">
+                            <div class="redacted-phone-notch"></div>
+                            <div class="redacted-phone-screen">
+                                <!-- Skeleton state -->
+                                <div class="redacted-screen-state skeleton-state">
+                                    <div class="skeleton-avatar shimmer"></div>
+                                    <div class="skeleton-line shimmer"></div>
+                                    <div class="skeleton-line shimmer"></div>
+                                    <div class="skeleton-line short shimmer"></div>
+                                </div>
+
+                                <!-- Final UI state -->
+                                <div class="redacted-screen-state final-state">
+                                    <div class="final-avatar"></div>
+                                    <div class="final-line title"></div>
+                                    <div class="final-line subtitle"></div>
+                                    <div class="final-pill"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="redacted-phone-caption">
+                            The same SwiftUI view: first shown as a loading skeleton, then revealed after applying
+                            <code>.redacted(reason: .placeholder)</code>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. Before redacted: how we used to build skeletons -->
+            <section>
+                <h2>Before <code>.redacted</code>: manual skeleton views</h2>
+                <p>
+                    Before <code>.redacted</code> was introduced, most teams implemented
+                    loading skeletons in one of two ways:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Dedicated skeleton views</strong> – creating a separate
+                        <code>ArticleRowSkeleton</code> that mimics the layout using gray
+                        rectangles, and switching to it when <code>isLoading == true</code>.
+                    </li>
+                    <li>
+                        <strong>Large conditional blocks in the body</strong> – checking
+                        loading state inside the view and returning either placeholders or
+                        the real content.
+                    </li>
+                </ul>
+
+                <p>
+                    Both approaches work, but they come with a cost: duplicated layout,
+                    more code to maintain, and a higher chance that the skeleton stops
+                    matching the final design after a few refactors.
+                </p>
+
+                <pre class="code-block"><code>// Old approach – two separate views
+if isLoading {
+    ArticleRowSkeleton()
+} else {
+    ArticleRow(article: article)
+}</code></pre>
+            </section>
+
+            <!-- 2. What redacted gives you -->
+            <section>
+                <h2>What <code>.redacted(reason: .placeholder)</code> gives you</h2>
+                <p>
+                    The <code>.redacted</code> modifier lets any SwiftUI view behave like
+                    a skeleton view without creating a separate skeleton component. You
+                    write the layout once, and SwiftUI draws placeholder shapes (gray
+                    bars, boxes, etc.) in place of the original content.
+                </p>
+                <p>
+                    The key benefit is <strong>zero layout duplication</strong>. You keep
+                    a single source of truth for your UI, and toggle the loading state
+                    using a simple boolean or a property from your view model.
+                </p>
+            </section>
+
+            <!-- 3. Basic pattern -->
+            <section>
+                <h2>A simple pattern using a loading flag</h2>
+                <p>
+                    A common pattern is to let the same row component handle both loading
+                    and loaded states using a single flag:
+                </p>
+
+                <pre class="code-block"><code>struct ArticleRow: View {
+    let title: String?
+    let summary: String?
+    let isLoading: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title ?? " ")
+                .font(.headline)
+
+            Text(summary ?? " ")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .redacted(reason: isLoading ? .placeholder : [])
+        .animation(.easeInOut(duration: 0.25), value: isLoading)
+    }
+}</code></pre>
+
+                <p>
+                    Here we pass a single space <code>" "</code> as a fallback instead of
+                    <code>nil</code>. That allows SwiftUI to keep the correct layout even
+                    while the content is redacted. Once <code>isLoading</code> flips to
+                    <code>false</code>, the placeholder is removed and the real content
+                    appears in exactly the same space.
+                </p>
+            </section>
+
+            <!-- 4. Applying at list level -->
+            <section>
+                <h2>Applying redaction at list level</h2>
+                <p>
+                    In a real app, the loading state usually lives in a view model
+                    (for example, an <code>@StateObject</code> or
+                    <code>@ObservedObject</code>). You can apply
+                    <code>.redacted</code> either to individual rows or to the entire
+                    list:
+                </p>
+
+                <pre class="code-block"><code>struct ArticlesListView: View {
+    @StateObject private var viewModel = ArticlesViewModel()
+
+    var body: some View {
+        List(viewModel.articles) { article in
+            ArticleRow(
+                title: article.title,
+                summary: article.summary,
+                isLoading: viewModel.isLoading
+            )
+        }
+        .redacted(reason: viewModel.isLoading ? .placeholder : [])
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isLoading)
+        .task {
+            await viewModel.loadArticles()
+        }
+    }
+}</code></pre>
+
+                <p>
+                    Applying the modifier on the list level is useful when you have
+                    multiple row types or sections and you want all of them to appear as
+                    placeholders while data is loading.
+                </p>
+            </section>
+
+            <!-- 5. Unredacted -->
+            <section>
+                <h2>Controlling where redaction stops</h2>
+                <p>
+                    Sometimes you want parts of the UI to remain real even while the rest
+                    of the view is redacted. A common example is persistent icons like a
+                    bookmark or a status badge. In those cases,
+                    <code>.unredacted()</code> lets you explicitly opt out:
+                </p>
+
+                <pre class="code-block"><code>HStack {
+    VStack(alignment: .leading) {
+        Text(title ?? " ")
+            .font(.headline)
+        Text(summary ?? " ")
+            .font(.subheadline)
+    }
+
+    Spacer()
+
+    // Keep the bookmark icon visible even in loading state
+    Image(systemName: "bookmark")
+        .unredacted()
+}</code></pre>
+
+                <p>
+                    This helps keep key actions or visual anchors visible while still
+                    giving the user a clear loading state for the main content.
+                </p>
+            </section>
+
+            <!-- 6. Accessibility -->
+            <section>
+                <h2>Accessibility and UX considerations</h2>
+                <p>
+                    Skeleton states also need to work well with VoiceOver and other
+                    assistive technologies. You usually don’t want the screen reader to
+                    read out placeholder text, so it’s better to expose a higher-level
+                    label while the view is loading:
+                </p>
+
+                <pre class="code-block"><code>VStack {
+    ArticleRow(title: title,
+               summary: summary,
+               isLoading: isLoading)
+}
+.accessibilityElement(children: .ignore)
+.accessibilityLabel(isLoading
+    ? "Loading article..."
+    : (title ?? "Article"))</code></pre>
+
+                <p>
+                    Also keep the animation subtle (around 0.2–0.3 seconds) so the
+                    transition between loading and loaded feels smooth without being
+                    distracting.
+                </p>
+            </section>
+
+            <!-- 7. When not to use it -->
+            <section>
+                <h2>When <code>.redacted</code> is not the right tool</h2>
+                <p>
+                    Not every loading state needs a skeleton. For very fast requests or
+                    simple views, a standard <code>ProgressView</code> or a direct
+                    content update can be clearer. Avoid redacting controls that the
+                    user still needs to interact with while other parts of the screen
+                    are loading.
+                </p>
+            </section>
+
+            <!-- 8. Takeaways -->
+            <section>
+                <h2>Key takeaways</h2>
+                <ul class="article-takeaways">
+                    <li>
+                        <strong>Write the layout once</strong> and use
+                        <code>.redacted(reason: .placeholder)</code> instead of
+                        duplicating views for skeleton states.
+                    </li>
+                    <li>
+                        <strong>Drive redaction from your view model</strong> using an
+                        <code>isLoading</code> flag or a similar piece of state.
+                    </li>
+                    <li>
+                        <strong>Think about UX and accessibility</strong> – skeletons
+                        should make the interface clearer, not noisier, especially for
+                        screen reader users.
+                    </li>
+                </ul>
+
+                <p>
+                    In a follow-up article I can go deeper into building a reusable
+                    shimmer effect modifier and how to combine it with
+                    <code>.redacted</code> for more polished loading states in SwiftUI.
+                </p>
+            </section>
+
+            <p class="article-back-link">
+                <a href="../index.html">← Back to Home</a>
+            </p>
+
+        </article>
+    </main>
+
+</body>
+
+</html>

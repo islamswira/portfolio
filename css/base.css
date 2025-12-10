@@ -1,0 +1,37 @@
+/* ============================
+   BASE (colors, reset, global)
+============================ */
+
+:root {
+    --bg-dark: #0C0C0C;
+    --bg-card: #111111;
+    --bg-section: #151515;
+
+    --text-light: #F2F2F2;
+    --text-muted: #CFCFCF;
+
+    --orange: #FF6A00;
+    --orange-soft: #FF8C32;
+
+    --cyan: #0EA5E9;
+    --cyan-soft: #38BDF8;
+
+    --shadow-orange: 0 0 18px rgba(255,106,0,0.45);
+    --shadow-cyan: 0 0 18px rgba(14,165,233,0.45);
+}
+
+* {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-light);
+}
+
+img {
+    max-width: 100%;
+}

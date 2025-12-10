@@ -1,0 +1,409 @@
+/* ============================
+            HOME
+============================ */
+
+/* ===== HERO SECTION ===== */
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+    min-height: calc(100vh - 90px);
+    background: linear-gradient(
+        135deg,
+        rgba(255,106,0,0.12),
+        rgba(14,165,233,0.12)
+    );
+}
+
+.hero-left {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hero-right {
+    width: 40%;
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+}
+
+/* LOTTIE ANIMATION */
+
+.hero-right lottie-player {
+    width: 540px;
+    height: 540px;
+    filter:
+        drop-shadow(0 0 25px rgba(255,106,0,0.35))
+        drop-shadow(0 0 45px rgba(14,165,233,0.25));
+    transition: 0.35s ease;
+}
+
+.hero-right lottie-player:hover {
+    transform: translateY(-6px) scale(1.03);
+    filter:
+        drop-shadow(0 0 40px rgba(255,106,0,0.5))
+        drop-shadow(0 0 60px rgba(14,165,233,0.4));
+}
+
+/* HERO TEXT */
+
+.hero-name {
+    font-size: 60px;
+    font-weight: 900;
+    margin: 0;
+}
+
+.gradient-name {
+    background: linear-gradient(90deg, var(--orange), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* HERO BADGE */
+
+.hero-badge span {
+    padding: 10px 22px;
+    border-radius: 30px;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    background: rgba(14,165,233,0.10);
+    box-shadow: 0 0 14px rgba(14,165,233,0.25);
+}
+
+/* HERO SKILLS ROW */
+
+.hero-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0 12px;
+    max-width: 520px;
+}
+
+/* HERO BUTTONS */
+
+.btn-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* ============================
+        HOME — BLOG FIX
+============================ */
+
+/* Blog section */
+.blog {
+    width: 100%;
+    padding: 80px 60px 140px;  /* نفس مسافة الهيرو تمامًا */
+}
+
+/* Blog header (title + subtitle) */
+.blog-header {
+    margin-bottom: 32px;
+}
+
+.blog-header .section-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-light);
+    text-shadow: 0 0 18px rgba(56,189,248,0.45);
+    text-align: left;          /* مهم */
+}
+
+.blog-header .section-subtitle {
+    margin-top: 10px;
+    max-width: 550px;
+    color: var(--text-muted);
+    font-size: 15px;
+    text-align: left;
+}
+
+/* Blog sections (SwiftUI Tips, etc.) */
+.blog-section {
+    margin-top: 50px;
+}
+
+.blog-section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 20px 0 20px;
+    color: var(--text-light);
+}
+
+/* Blog grid */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+}
+
+/* Blog cards */
+.blog-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px 24px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--orange);
+    box-shadow: 0 0 20px rgba(255,106,0,0.45);
+}
+
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 900px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 100px 20px;
+    }
+
+    .hero-right {
+        display: none;
+    }
+
+    .hero-skills {
+        justify-content: center;
+        max-width: 100%;
+    }
+}
+
+/* =======================================
+   HOME PAGE RESPONSIVE IMPROVEMENTS
+========================================== */
+
+/* --- Medium Screens (Tablets) --- */
+@media (max-width: 992px) {
+
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 30px;
+        padding-top: 40px;
+    }
+
+    .hero-text-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .hero-title {
+        font-size: clamp(30px, 6vw, 40px);
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
+    }
+
+    .skills-row {
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .blog-section {
+        margin-top: 80px;
+    }
+}
+
+/* --- Mobile Screens --- */
+@media (max-width: 768px) {
+
+    .hero-section {
+        padding: 20px;
+    }
+
+    .hero-title {
+        font-size: 28px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+        opacity: 0.85;
+    }
+
+    .skills-row span {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .lottie-animation {
+        width: 250px;
+        margin: 0 auto;
+    }
+
+    /* Blog Cards: 1 per row */
+    .blog-grid {
+        grid-template-columns: 1fr !important;
+        gap: 26px;
+        margin-top: 40px;
+    }
+
+    .blog-card {
+        padding: 20px;
+    }
+
+    .blog-card img {
+        height: 160px;
+    }
+}
+
+/* --- Small Mobile (iPhone SE, 360px width) --- */
+@media (max-width: 480px) {
+
+    .hero-title {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+        font-size: 14px;
+    }
+
+    .skills-row {
+        gap: 6px;
+    }
+
+    .skills-row span {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .blog-title {
+        font-size: 22px;
+        text-align: center;
+    }
+
+    .blog-card img {
+        height: 140px;
+    }
+}
+
+/* Fix Hero Overlap on Mobile */
+@media (max-width: 900px) {
+    .hero {
+        margin-top: 140px; /* يعوض ارتفاع الـ navbar */
+    }
+}
+
+@media (max-width: 700px) {
+    .hero {
+        margin-top: 170px; /* لما اللينكات تنزل سطرين */
+    }
+}
+
+@media (max-width: 500px) {
+    .hero {
+        margin-top: 200px; /* أصغر الشاشات */
+    }
+}
+
+/* ==========================================
+   FIX HERO ON MOBILE — FINAL VERSION
+========================================== */
+
+@media (max-width: 900px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 140px 20px 60px;   /* عشان نعمل space تحت الـ navbar */
+        gap: 32px;
+    }
+
+    .hero-left {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-name {
+        font-size: 46px;
+        line-height: 1.1;
+        text-align: center;
+    }
+
+    .hero-bio {
+        max-width: 90%;
+        font-size: 17px;
+        line-height: 1.45;
+        text-align: center;
+    }
+
+    .hero-skills {
+        justify-content: center;
+    }
+
+    /* إخفاء اللوتي على الموبايل */
+    .hero-right {
+        display: none !important;
+    }
+}
+
+/* ---------- أصغر شاشات ---------- */
+@media (max-width: 600px) {
+
+    .hero {
+        padding-top: 170px;  /* navbar أعلى */
+    }
+
+    .hero-name {
+        font-size: 38px;
+    }
+
+    .hero-bio {
+        font-size: 15px;
+    }
+
+    .skill-pill {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+/* ---------- الشاشات الصغيرة جداً (iPhone SE) ---------- */
+@media (max-width: 400px) {
+
+    .hero {
+        padding-top: 200px; /* navbar + lines */
+    }
+
+    .hero-name {
+        font-size: 32px;
+    }
+
+    .hero-bio {
+        font-size: 14px;
+        max-width: 95%;
+    }
+}
+
+/* ==========================================
+   FIX ROLE BADGE ON MOBILE
+========================================== */
+@media (max-width: 600px) {
+    .hero-badge,
+    .role-badge,
+    .hero-title-tag {
+        max-width: 90%;
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+        white-space: normal !important;   /* يسمح بالنزول لسطر جديد */
+        line-height: 1.4 !important;
+        text-align: center !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+}
