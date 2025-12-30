@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scalable Network Layer in SwiftUI – Islam Swira
+    </title>
+
+    <!-- Base CSS for all portfolio pages -->
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/network_layer_clean_arch.css" />
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <a href="../index.html" style="color:inherit;text-decoration:none;">Islam Swira</a>
+        </div>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../projects.html">Projects</a>
+            <a href="../experience.html">Experience</a>
+            <a href="../contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="blog-article-wrapper">
+        <article class="blog-article">
+
+            <p class="article-meta">
+                SwiftUI Architecture · Nov 30, 2025 · 10 min read
+            </p>
+
+            <h1 class="article-title">
+                Scalable Network Layer in SwiftUI with Clean Architecture
+            </h1>
+
+            <p class="article-intro">
+                Networking is one of the most critical parts of any modern iOS application.
+                Whether you’re building a fintech app, a social platform, or an SDK consumed by multiple apps, <b>a
+                    poorly designed network layer quickly becomes a bottleneck.</b>
+                With SwiftUI and modern iOS architectures, it’s no longer enough to “just make API calls.”
+                We need a clean, testable, scalable, and reusable network layer that fits naturally within Clean
+                Architecture.
+                In this article, I’ll walk through how to design a robust network layer in SwiftUI, aligned with Clean
+                Architecture principles, and explain why each decision matters
+            </p>
+
+            <!-- Hero demo: iPhone only -->
+            <section class="network-hero">
+                <h2 class="network-hero-title">
+                    Clean Network Flow in SwiftUI
+                </h2>
+
+                <p class="network-hero-subtitle">
+                    From user intent to decoded domain models — a clean, testable, and scalable networking pipeline.
+                </p>
+
+                <div class="network-flow">
+
+                    <div class="network-node client">
+                        <span>SwiftUI View</span>
+                    </div>
+
+                    <div class="network-arrow">→</div>
+
+                    <div class="network-node request">
+                        <span>Request</span>
+                    </div>
+
+                    <div class="network-arrow">→</div>
+
+                    <div class="network-node transport">
+                        <span>Network Layer</span>
+                    </div>
+
+                    <div class="network-arrow">→</div>
+
+                    <div class="network-node decoder">
+                        <span>Decoder</span>
+                    </div>
+
+                    <div class="network-arrow">→</div>
+
+                    <div class="network-node domain">
+                        <span>Domain Model</span>
+                    </div>
+
+                </div>
+
+                <p class="network-hero-caption">
+                    A clean separation between UI, networking, and domain logic — inspired by Clean Architecture
+                    principles.
+                </p>
+            </section>
+
+
+            <!-- ARTICLE CONTENT -->
+
+            <section>
+                <h2>Why Networking Becomes a Bottleneck at Scale</h2>
+                <p>
+                    Early-stage apps often place networking logic directly inside ViewModels.
+                    This works — until the app grows.
+                </p>
+                <ul>
+                    <li>ViewModels become aware of HTTP concepts</li>
+                    <li>Error handling is duplicated across screens</li>
+                    <li>Mocking requires fragile hacks</li>
+                    <li>SDK reuse becomes impossible</li>
+                </ul>
+                <p>
+                    Clean Architecture forces us to treat networking as an
+                    <strong>infrastructure detail</strong>, not a feature concern.
+                </p>
+            </section>
+
+            <section>
+                <h2>Where the Network Layer Lives in Clean Architecture</h2>
+                <p>
+                    The network layer belongs to the <strong>outermost circle</strong>.
+                    It depends inward — never outward.
+                </p>
+                <p>
+                    That means:
+                </p>
+                <ul>
+                    <li>No SwiftUI imports</li>
+                    <li>No ViewModels</li>
+                    <li>No business rules</li>
+                </ul>
+                <p>
+                    Its only job: <strong>transport + decoding</strong>.
+                </p>
+            </section>
+
+            <section>
+                <h2>Designing a Protocol-Driven Network Client</h2>
+
+                <pre><code>protocol NetworkClient {
+    func send&lt;T: Decodable&gt;(
+        _ request: URLRequest
+    ) async throws -&gt; T
+}</code></pre>
+
+                <p>
+                    This abstraction gives you:
+                </p>
+                <ul>
+                    <li>Replaceable implementations</li>
+                    <li>Deterministic tests</li>
+                    <li>SDK-ready architecture</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>URLSession as an Implementation Detail</h2>
+
+                <pre><code>final class URLSessionNetworkClient: NetworkClient {
+
+    func send&lt;T: Decodable&gt;(
+        _ request: URLRequest
+    ) async throws -&gt; T {
+
+        let (data, response) =
+            try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              200...299 ~= httpResponse.statusCode else {
+            throw NetworkError.invalidResponse
+        }
+
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}</code></pre>
+
+                <p>
+                    Note how this class has:
+                </p>
+                <ul>
+                    <li>No knowledge of endpoints</li>
+                    <li>No domain awareness</li>
+                    <li>No UI dependencies</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Endpoint Abstraction (Avoiding Stringly-Typed APIs)</h2>
+
+                <pre><code>protocol Endpoint {
+    var path: String { get }
+    var method: HTTPMethod { get }
+    var headers: [String: String] { get }
+}</code></pre>
+
+                <p>
+                    This allows compile-time safety and consistency across requests.
+                </p>
+            </section>
+
+            <section>
+                <h2>Decoding Is Not Domain Modeling</h2>
+
+                <pre><code>struct UserDTO: Decodable {
+    let id: String
+    let name: String
+}
+
+struct User {
+    let id: String
+    let displayName: String
+}
+
+extension User {
+    init(dto: UserDTO) {
+        id = dto.id
+        displayName = dto.name
+    }
+}</code></pre>
+
+                <p>
+                    DTOs mirror the API. Domain models mirror the business.
+                    They should evolve independently.
+                </p>
+            </section>
+
+            <section>
+                <h2>Threading & SwiftUI Integration</h2>
+
+                <pre><code>@MainActor
+final class UsersViewModel: ObservableObject {
+
+    @Published var users: [User] = []
+
+    private let client: NetworkClient
+
+    init(client: NetworkClient) {
+        self.client = client
+    }
+
+    func loadUsers() async {
+        let dtos: [UserDTO] =
+            try await client.send(
+                UsersEndpoint()
+                    .makeRequest(baseURL: API.baseURL)
+            )
+
+        users = dtos.map(User.init)
+    }
+}</code></pre>
+
+                <p>
+                    Notice how:
+                </p>
+                <ul>
+                    <li>Concurrency stays explicit</li>
+                    <li>ViewModels stay testable</li>
+                    <li>No networking logic leaks upward</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Error Modeling for Real Systems</h2>
+
+                <pre><code>enum NetworkError: Error {
+    case invalidResponse
+    case unauthorized
+    case decoding(Error)
+    case transport(Error)
+}</code></pre>
+
+                <p>
+                    Explicit error modeling is essential for:
+                </p>
+                <ul>
+                    <li>Analytics</li>
+                    <li>User messaging</li>
+                    <li>Retry strategies</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Testing Without the Network</h2>
+
+                <pre><code>final class MockNetworkClient: NetworkClient {
+
+    func send&lt;T: Decodable&gt;(
+        _ request: URLRequest
+    ) async throws -&gt; T {
+        try MockData.load()
+    }
+}</code></pre>
+
+                <p>
+                    This allows full ViewModel testing with:
+                </p>
+                <ul>
+                    <li>No HTTP calls</li>
+                    <li>No async flakiness</li>
+                    <li>Predictable results</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Key Takeaways for Senior Engineers</h2>
+                <ul class="article-takeaways">
+                    <li>Networking is infrastructure, not feature logic</li>
+                    <li>Protocols unlock testability and reuse</li>
+                    <li>DTOs and domain models must be separated</li>
+                    <li>Design for SDKs even if you don’t ship one yet</li>
+                </ul>
+            </section>
+
+             <p class="article-back-link">
+                <a href="../index.html">← Back to Home</a>
+            </p>
+
+        </article>
+    </main>
+
+</body>
+
+</html>
